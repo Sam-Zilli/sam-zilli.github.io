@@ -1,0 +1,56 @@
+#overlayText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: Georgia, serif;
+  font-size: 100px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none; 
+
+  color: rgba(29, 69, 104, 0.6);
+  transition: all 0.3s ease;
+  text-shadow: 3px 5px 1px rgba(255, 255, 255, 0.6);
+} 
+
+.frosty-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 30px;
+  background: rgba(84, 176, 237, 0.1); /* frosty transparent */
+  backdrop-filter: blur(10px);          /* blurred glass effect */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.frosty-navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 30px;
+}
+
+.frosty-navbar li {
+  display: inline;
+  color: red;
+}
+
+.frosty-navbar a {
+  text-decoration: none;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.frosty-navbar a:hover {
+  color: rgb(190, 0, 0);
+  text-shadow: 0 0 5px rgba(3, 7, 11, 0.8);
+}
+/* .frosty-navbar a:active {
+  color: rgba(0, 4, 8, 0.8);
+  text-shadow: 0 0 5px rgba(180, 220, 255, 0.8);
+} */

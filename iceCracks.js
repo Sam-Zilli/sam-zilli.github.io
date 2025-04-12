@@ -1,19 +1,23 @@
 let allVines = [];
 let maxSegments = 200;
-let textGraphic;
+// let textGraphic;
+
+let cnv;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  cnv = createCanvas(windowWidth, windowHeight);
+  cnv.style('z-index', '-1'); // move canvas behind the text
+  cnv.position(0, 0); // make sure it's positioned correctly
   frameRate(30);
   startNewVine();
-  background(220, 240, 255); // icy blue
-  createTextGraphic();
+  // background(220, 240, 255); // icy blue
 }
+
 
 function draw() {
   // Frosty translucent white layer
   noStroke();
-  fill(255, 255, 255, 5); // subtle frost
+  // fill(255, 255, 255, 5); // subtle frost
   rect(0, 0, width, height);
 
   // Cold glow spots
@@ -33,7 +37,7 @@ function draw() {
     startNewVine();
   }
 
-  image(textGraphic, 0, 0);
+  // image(textGraphic, 0, 0);
 }
 
 function drawColdGlow(x, y) {
@@ -42,18 +46,19 @@ function drawColdGlow(x, y) {
     fill(180, 220, 255, map(r, 30, 0, 5, 0)); // soft icy blue fade
     ellipse(x, y, r * 2);
   }
+  fill(0,0,0, 0);
 }
 
-function createTextGraphic() {
-  textGraphic = createGraphics(width, height);
-  textGraphic.pixelDensity(1);
-  textGraphic.background(255, 255, 255, 0);
-  textGraphic.textSize(100);
-  textGraphic.textAlign(CENTER, CENTER); 
-  textGraphic.fill(180, 220, 255, 120); // soft icy blue
-  textGraphic.textFont("Georgia");
-  textGraphic.text("SAM ZILLI", width / 2, height / 2);
-}
+// function createTextGraphic() {
+//   textGraphic = createGraphics(width, height);
+//   textGraphic.pixelDensity(1);
+//   textGraphic.background(255, 255, 255, 0);
+//   textGraphic.textSize(100);
+//   textGraphic.textAlign(CENTER, CENTER); 
+//   textGraphic.fill(180, 220, 255, 120); // soft icy blue
+//   textGraphic.textFont("Georgia");
+//   textGraphic.text("SAM ZILLI", width / 2, height / 2);
+// }
 
 function startNewVine() {
   allVines.push(new Vine(random(width), height));
@@ -61,8 +66,8 @@ function startNewVine() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  createTextGraphic();
-  background(220, 240, 255);
+  // createTextGraphic();
+  // background(220, 240, 255);
 }
 
 class Vine {
