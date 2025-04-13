@@ -14,43 +14,63 @@
   text-shadow: 3px 5px 1px rgba(255, 255, 255, 0.6);
 } 
 
-.frosty-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 10px 30px;
-  background: rgba(84, 176, 237, 0.1); /* frosty transparent */
-  backdrop-filter: blur(10px);          /* blurred glass effect */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+#p5-container canvas {
+  pointer-events: none;
 }
 
-.frosty-navbar ul {
-  list-style: none;
+body {
   margin: 0;
   padding: 0;
-  display: flex;
-  gap: 30px;
+  overflow: hidden;
 }
 
-.frosty-navbar li {
-  display: inline;
-  color: red;
+
+#content-area {
+  padding: 40px 20px;
+  opacity: 1;
+  transition: opacity 0.4s ease;
 }
 
-.frosty-navbar a {
-  text-decoration: none;
-  font-family: 'Georgia', serif;
-  font-size: 18px;
-  transition: color 0.3s ease;
+#content-area.fade-out {
+  opacity: 0;
 }
 
-.frosty-navbar a:hover {
-  color: rgb(190, 0, 0);
-  text-shadow: 0 0 5px rgba(3, 7, 11, 0.8);
+/* Coding Page Card Styles */
+.card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-/* .frosty-navbar a:active {
-  color: rgba(0, 4, 8, 0.8);
-  text-shadow: 0 0 5px rgba(180, 220, 255, 0.8);
-} */
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.btn-primary {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.card:hover {
+  border: 1px solid rgba(0, 123, 255, 0.3);
+}
