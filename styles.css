@@ -4,15 +4,15 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: Georgia, serif;
-  font-size: 100px;
+  font-size: 10vw;  /* Adjusts font size based on viewport width */
   text-align: center;
   pointer-events: none;
-  user-select: none; 
-
+  user-select: none;
   color: rgba(29, 69, 104, 0.6);
   transition: all 0.3s ease;
   text-shadow: 3px 5px 1px rgba(255, 255, 255, 0.6);
-} 
+}
+
 
 #p5-container canvas {
   pointer-events: none;
