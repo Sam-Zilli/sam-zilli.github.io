@@ -39,39 +39,150 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.querySelector('.container');
     container.innerHTML = `<div class="loading">Loading ${moduleType} projects...</div>`;
     
-    // Remove any previously loaded module script
-    const oldScript = document.querySelector('script[data-module]');
-    if (oldScript) {
-      oldScript.remove();
-    }
-    
-    // Create and add the new script element
-    const script = document.createElement('script');
-    script.setAttribute('data-module', moduleType);
-    
+    // Define our projects data directly in this script to avoid loading issues
     if (moduleType === 'music') {
-      script.src = 'music-projects.js';
+      loadMusicProjects();
     } else if (moduleType === 'coding') {
-      script.src = 'coding-projects.js';
+      loadCodingProjects();
     } else if (moduleType === 'home') {
-      // Home content can be loaded directly or from another script
+      // Home content can be loaded directly
       container.innerHTML = createHomeContent();
-      return;
     }
+  }
+  
+  // Function to load coding projects
+  function loadCodingProjects() {
+    const codingProjects = [
+      {
+        title: "Project A",
+        description: "A full-stack application built with React and Node.js. Features include user authentication, data visualization, and real-time updates.",
+        imageUrl: "https://picsum.photos/200/300?random=3",
+        link: "#",
+        date: "May 2024"
+      },
+      {
+        title: "Project B",
+        description: "Mobile app developed using Flutter. Includes offline capabilities, custom animations, and integration with multiple APIs.",
+        imageUrl: "https://picsum.photos/200/300?random=4",
+        link: "#",
+        date: "April 2024"
+      },
+      {
+        title: "Project C",
+        description: "Machine learning model for image recognition, built with TensorFlow and deployed as a web service.",
+        imageUrl: "https://picsum.photos/200/300?random=5",
+        link: "#",
+        date: "March 2024"
+      }
+    ];
     
-    // Add the script to the document
-    document.body.appendChild(script);
+    generateCards(codingProjects, 'Coding Projects', 'coding');
+  }
+  
+  // Function to load music projects
+  function loadMusicProjects() {
+    const musicProjects = [
+      {
+        title: "Album One",
+        description: "My debut album featuring 10 original tracks. A blend of electronic and acoustic elements with themes of nature and technology.",
+        imageUrl: "https://picsum.photos/200/300?random=6",
+        link: "#",
+        date: "June 2024",
+        duration: "42 mins"
+      },
+      {
+        title: "Collaboration EP",
+        description: "A four-track EP created in collaboration with other artists. Explores experimental sound design and ambient textures.",
+        imageUrl: "https://picsum.photos/200/300?random=7",
+        link: "#",
+        date: "February 2024",
+        duration: "18 mins"
+      },
+      {
+        title: "Live Performance",
+        description: "Recording of my live performance at the Downtown Music Festival. Features improvised sections and unique arrangements of my studio work.",
+        imageUrl: "https://picsum.photos/200/300?random=8",
+        link: "#",
+        date: "January 2024",
+        duration: "65 mins"
+      },
+      {
+        title: "Single Release",
+        description: "Latest single release with accompanying music video. A departure from my usual style, incorporating orchestral elements.",
+        imageUrl: "https://picsum.photos/200/300?random=9",
+        link: "#",
+        date: "April 2024",
+        duration: "4:35"
+      }
+    ];
     
-    // Handle script load event
-    script.onload = function() {
-      // The respective module's generateProjectCards function will be called
-      // from within each module file
-    };
+    generateCards(musicProjects, 'Music Projects', 'music');
+  }
+  
+  // Generic function to generate cards
+  function generateCards(projects, sectionTitle, projectType) {
+    const container = document.querySelector('.container');
     
-    // Handle script load error
-    script.onerror = function() {
-      container.innerHTML = `<div class="error">Error loading ${moduleType} projects. Please try again later.</div>`;
-    };
+    // Clear any existing content in the container
+    container.innerHTML = '';
+    
+    // Add section heading
+    const heading = document.createElement('h2');
+    heading.className = 'section-heading';
+    heading.textContent = sectionTitle;
+    container.appendChild(heading);
+    
+    // Loop through each project in the array
+    projects.forEach((project, index) => {
+      // Create colors array to cycle through for different card styles
+      const colors = ['blue', 'red', 'green', 'yellow'];
+      const colorClass = colors[index % colors.length];
+      
+      // Create card HTML using template literal
+      let cardHTML = `
+        <article class="postcard dark ${colorClass}">
+          <a class="postcard__img_link" href="${project.link}">
+            <img class="postcard__img" src="${project.imageUrl}" alt="${project.title}">
+          </a>
+          <div class="postcard__text">
+            <h1 class="postcard__title ${colorClass}"><a href="${project.link}">${project.title}</a></h1>
+            <div class="postcard__subtitle small">
+              <time datetime="${project.date}">
+                <i class="fas fa-calendar-alt mr-2"></i>${project.date}
+              </time>
+            </div>
+            <div class="postcard__bar"></div>
+            <div class="postcard__preview-txt">${project.description}</div>
+            <ul class="postcard__tagbox">
+      `;
+      
+      // Add different tags based on project type
+      if (projectType === 'music') {
+        cardHTML += `
+              <li class="tag__item"><i class="fas fa-tag mr-2"></i>Music</li>
+              <li class="tag__item"><i class="fas fa-clock mr-2"></i>${project.duration || 'N/A'}</li>
+              <li class="tag__item play ${colorClass}">
+                <a href="${project.link}"><i class="fas fa-play mr-2"></i>Listen Now</a>
+              </li>
+        `;
+      } else {
+        cardHTML += `
+              <li class="tag__item"><i class="fas fa-tag mr-2"></i>Coding</li>
+              <li class="tag__item play ${colorClass}">
+                <a href="${project.link}"><i class="fas fa-code mr-2"></i>View Project</a>
+              </li>
+        `;
+      }
+      
+      cardHTML += `
+            </ul>
+          </div>
+        </article>
+      `;
+      
+      // Append the card to the container
+      container.innerHTML += cardHTML;
+    });
   }
   
   // Function to create home content
