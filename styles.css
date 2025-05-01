@@ -323,3 +323,109 @@ header {
 		 background-image: linear-gradient(80deg, rgba(189, 187, 73, 0.1), transparent 50%);
 	}
 }
+
+
+
+/* Additional styles for the navigation and sections */
+
+/* Active navigation link */
+.nav-list li a.active {
+	font-weight: bold;
+	color: #3498db; /* Blue highlight color */
+	border-bottom: 2px solid #3498db;
+  }
+  
+  /* Section heading */
+  .section-heading {
+	text-align: center;
+	margin-bottom: 2rem;
+	color: #f0f0f0;
+	font-size: 2.5rem;
+	position: relative;
+	padding-bottom: 1rem;
+  }
+  
+  .section-heading::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 80px;
+	height: 4px;
+	background: linear-gradient(to right, #3498db, #e74c3c, #2ecc71, #f1c40f);
+  }
+  
+  /* Profile section for home page */
+  .profile-section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	padding: 2rem;
+	color: #f0f0f0;
+  }
+  
+  @media (min-width: 768px) {
+	.profile-section {
+	  flex-direction: row;
+	  text-align: left;
+	  align-items: flex-start;
+	}
+  }
+  
+  .profile-image {
+	margin-bottom: 2rem;
+  }
+  
+  .profile-image img {
+	width: 250px;
+	height: 250px;
+	border-radius: 50%;
+	border: 5px solid #3498db;
+	box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+  }
+  
+  .profile-content {
+	max-width: 600px;
+  }
+  
+  .profile-content h1 {
+	font-size: 3rem;
+	margin-bottom: 0.5rem;
+  }
+  
+  .profile-content h2 {
+	font-size: 1.5rem;
+	color: #aaa;
+	margin-bottom: 1.5rem;
+  }
+  
+  .profile-content p {
+	font-size: 1.2rem;
+	line-height: 1.6;
+  }
+  
+  /* Loading and error messages */
+  .loading, .error {
+	text-align: center;
+	padding: 2rem;
+	font-size: 1.2rem;
+	color: #f0f0f0;
+  }
+  
+  .loading {
+	animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 1; }
+	100% { opacity: 0.6; }
+  }
+  
+  .error {
+	color: #e74c3c;
+	border: 1px solid #e74c3c;
+	border-radius: 5px;
+  }
