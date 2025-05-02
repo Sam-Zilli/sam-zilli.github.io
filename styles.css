@@ -429,3 +429,15 @@ header {
 	border: 1px solid #e74c3c;
 	border-radius: 5px;
   }
+
+
+  footer {
+	color : black;
+  }
+
+
+
+  h2.section-heading {
+	color : pink;
+	  }
+  
