@@ -1,28 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
+  initLessonFlow();
   initStepVisualizers();
   initQuizzes();
 });
 
-function initTabs() {
-  const tabButtons = document.querySelectorAll('[data-tab-target]');
-  const tabPanels = document.querySelectorAll('[data-tab-panel]');
+function initLessonFlow() {
+  const panels = document.querySelectorAll('[data-lesson-panel]');
+  const tabs = document.querySelectorAll('[data-lesson-tab]');
 
-  function activateTab(targetId) {
-    tabButtons.forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.tabTarget === targetId);
+  function goToSection(sectionId) {
+    panels.forEach((panel) => {
+      panel.classList.toggle('is-active', panel.dataset.lessonPanel === sectionId);
     });
-    tabPanels.forEach((panel) => {
-      panel.classList.toggle('is-active', panel.dataset.tabPanel === targetId);
+    tabs.forEach((tab) => {
+      tab.classList.toggle('is-active', tab.dataset.lessonTab === sectionId);
     });
+    document.querySelector('main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  tabButtons.forEach((btn) => {
-    btn.addEventListener('click', () => activateTab(btn.dataset.tabTarget));
+  document.querySelectorAll('[data-lesson-next]').forEach((btn) => {
+    btn.addEventListener('click', () => goToSection(btn.dataset.lessonNext));
   });
 
-  const initial = tabButtons[0]?.dataset.tabTarget;
-  if (initial) activateTab(initial);
+  document.querySelectorAll('[data-lesson-prev]').forEach((btn) => {
+    btn.addEventListener('click', () => goToSection(btn.dataset.lessonPrev));
+  });
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => goToSection(tab.dataset.lessonTab));
+  });
+
+  goToSection('intro');
 }
 
 function initStepVisualizers() {
@@ -31,12 +39,26 @@ function initStepVisualizers() {
     const highlights = viz.querySelectorAll('[data-step-highlight]');
     const explanations = viz.querySelectorAll('[data-step-explanation]');
 
+    const annotations = viz.querySelectorAll('[data-viz-annotation]');
+    const stepPhases = viz.querySelectorAll('[data-step-visible]');
+
     function goToStep(stepId) {
+      const step = String(stepId);
       stepButtons.forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.stepId === stepId);
+        btn.classList.toggle('active', btn.dataset.stepId === step);
+      });
+      stepPhases.forEach((el) => {
+        const allowed = el.dataset.stepVisible.split(',').map((s) => s.trim());
+        el.hidden = !allowed.includes(step);
       });
       highlights.forEach((el) => {
-        el.classList.toggle('is-highlighted', el.dataset.stepHighlight === stepId);
+        el.classList.toggle(
+          'is-highlighted',
+          step !== '0' && el.dataset.stepHighlight === step
+        );
+      });
+      annotations.forEach((el) => {
+        el.hidden = step === '0';
       });
       explanations.forEach((el) => {
         el.classList.toggle('is-visible', el.dataset.stepExplanation === stepId);
