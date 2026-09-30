@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Python Evaluates Expressions | Sam Zilli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg-elevated: #161b26;
+      --bg-card: #1c2333;
+      --border: #2a3348;
+      --text: #e8ecf4;
+      --text-muted: #9aa4b8;
+      --accent: #3b9eff;
+      --accent-dim: rgba(59, 158, 255, 0.15);
+      --python: #ffd43b;
+      --python-dim: rgba(255, 212, 59, 0.12);
+      --success: #3dd68c;
+      --success-dim: rgba(61, 214, 140, 0.15);
+      --danger: #f87171;
+      --danger-dim: rgba(248, 113, 113, 0.15);
+      --code-bg: #0d1018;
+      --radius: 10px;
+      --font-sans: "Inter", system-ui, sans-serif;
+      --font-mono: "Fira Code", ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 158, 255, 0.08), transparent);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      padding: 1rem 1.5rem;
+    }
+
+    .site-header__inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .site-header__logo {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .site-header__logo i {
+      color: var(--python);
+      font-size: 1.5rem;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .intro-panel .hero {
+      margin-bottom: 0;
+    }
+
+    .intro-panel .lesson-nav {
+      margin-top: 1.75rem;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .hero {
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--text-muted);
+      max-width: 42rem;
+    }
+
+    .lesson-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lesson-tab {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .lesson-tab:hover {
+      color: var(--text);
+      background: var(--bg-card);
+    }
+
+    .lesson-tab.is-active {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-color: var(--border);
+    }
+
+    .lesson-panel {
+      display: none;
+    }
+
+    .lesson-panel.is-active {
+      display: block;
+    }
+
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .lesson-progress {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .lesson-btn {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lesson-btn--next {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0f1117;
+    }
+
+    .lesson-btn--next:hover {
+      filter: brightness(1.08);
+    }
+
+    .lesson-btn--back {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .lesson-btn--back:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card h2, .card h3 {
+      margin-top: 0;
+      font-weight: 600;
+    }
+
+    .card h2 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+    .card h3 { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+    .code-block {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+
+    .step-viz {
+      margin-top: 1rem;
+    }
+
+    .step-viz__label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .step-viz__intro {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0 0 1rem;
+      max-width: 40rem;
+    }
+
+    .step-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .step-btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .step-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .step-btn.active {
+      color: var(--bg);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .code-editor {
+      font-family: var(--font-mono);
+      background: var(--code-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .code-editor__row {
+      display: flex;
+      align-items: stretch;
+      min-height: 2rem;
+    }
+
+    .code-editor__row + .code-editor__row {
+      border-top: 1px solid var(--border);
+    }
+
+    .code-editor__ln {
+      flex: 0 0 2.85rem;
+      padding: 0.55rem 0.5rem;
+      text-align: right;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      opacity: 0.7;
+      user-select: none;
+      background: rgba(0, 0, 0, 0.2);
+      border-right: 1px solid var(--border);
+    }
+
+    .code-editor__code {
+      flex: 1;
+      min-width: 0;
+      padding: 0.55rem 1rem;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .token-hl {
+      padding: 0.1em 0.2em;
+      border-radius: 4px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .token-hl.is-highlighted {
+      background: var(--accent-dim);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .token-hl.is-highlighted.hl-warm {
+      background: var(--python-dim);
+      box-shadow: 0 0 0 2px var(--python);
+    }
+
+    .token-hl.is-highlighted.hl-done {
+      background: var(--success-dim);
+      box-shadow: 0 0 0 2px var(--success);
+    }
+
+    .code-kw { color: #f87171; font-weight: 600; }
+    .code-fn { color: var(--accent); font-weight: 600; }
+    .code-str { color: var(--success); }
+    .code-num { color: var(--python); }
+    .code-var { color: var(--python); }
+    .code-op { color: #fbbf24; font-weight: 600; }
+
+    .rules-panel {
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .rule-card {
+      position: relative;
+      padding: 1.35rem 1.35rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .rule-card:hover {
+      border-color: rgba(59, 158, 255, 0.35);
+    }
+
+    .rule-card--sequence { --rule-accent: #c084fc; }
+    .rule-card--assign { --rule-accent: #3b9eff; }
+    .rule-card--calls { --rule-accent: #3dd68c; }
+    .rule-card--math { --rule-accent: #ffd43b; }
+
+    .rule-card__head {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .rule-card__title {
+      margin: 0 0 0.25rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .rule-card__tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--rule-accent);
+      opacity: 0.95;
+    }
+
+    .rule-card__body {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .rule-card .step-viz {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .rule-card .step-viz__label {
+      color: var(--rule-accent);
+    }
+
+    .rule-card .step-btn.active {
+      background: var(--rule-accent);
+      border-color: var(--rule-accent);
+    }
+
+    .rule-card .token-hl.is-highlighted {
+      box-shadow: 0 0 0 2px var(--rule-accent);
+      background: color-mix(in srgb, var(--rule-accent) 20%, transparent);
+    }
+
+    .rule-card .token-hl.is-highlighted.hl-warm {
+      box-shadow: 0 0 0 2px var(--python);
+      background: var(--python-dim);
+    }
+
+    .rule-card .token-hl.is-highlighted.hl-done {
+      box-shadow: 0 0 0 2px var(--success);
+      background: var(--success-dim);
+    }
+
+    .step-explanation {
+      display: none;
+      padding: 0.65rem 0 0;
+      margin: 0;
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .step-explanation.is-visible {
+      display: block;
+    }
+
+    .step-explanation strong {
+      color: var(--text);
+    }
+
+    .quiz-block {
+      margin-bottom: 2rem;
+    }
+
+    .quiz-block h3 {
+      margin: 0 0 1rem;
+      font-size: 1.05rem;
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.55;
+    }
+
+    .quiz-block h3 code,
+    .quiz-option-label code,
+    .feedback-box code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      color: var(--python);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.12em 0.4em;
+      border-radius: 4px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .quiz-option-label {
+      font-family: inherit;
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .quiz-option-label:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .quiz-option-label.quiz-option--correct {
+      border-color: #34d399;
+      background: rgba(52, 211, 153, 0.22);
+      color: #ecfdf5;
+    }
+
+    .quiz-option-label.quiz-option--correct code {
+      color: #fde68a;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .quiz-option-label.quiz-option--wrong {
+      border-color: #f87171;
+      background: rgba(248, 113, 113, 0.22);
+      color: #fef2f2;
+    }
+
+    .quiz-option-label.quiz-option--wrong code {
+      color: #fde68a;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .feedback-box {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .feedback-box.is-visible {
+      display: block;
+    }
+
+    .feedback-box[data-feedback="correct"] {
+      background: rgba(52, 211, 153, 0.18);
+      color: #d1fae5;
+      border: 1px solid rgba(52, 211, 153, 0.45);
+    }
+
+    .feedback-box[data-feedback="wrong"] {
+      background: rgba(248, 113, 113, 0.18);
+      color: #fee2e2;
+      border: 1px solid rgba(248, 113, 113, 0.45);
+    }
+
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .site-footer p { margin: 0; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <div class="site-header__logo">
+        <i class="fa-brands fa-python" aria-hidden="true"></i>
+        <span>Python Evaluation Order</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="lesson-tabs" aria-label="Lesson sections">
+      <button type="button" class="lesson-tab is-active" data-lesson-tab="intro">Intro</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="rule1">Rule 1</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="rule2">Rule 2</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="rule3">Rule 3</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="rule4">Rule 4</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="nested">Nested</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="spotlight">Spotlight</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="quiz">Quiz</button>
+    </nav>
+
+    <div class="lesson-panel is-active" data-lesson-panel="intro">
+      <div class="card intro-panel">
+        <section class="hero">
+          <h1>How Python Evaluates Expressions</h1>
+          <p>
+            This lesson is about <strong>when</strong> Python runs each piece of code.
+          </p>
+        </section>
+        <div class="lesson-nav">
+          <span class="lesson-progress">1 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="rule1">
+            Next: Rule 1 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="rule1">
+      <div class="card rules-panel">
+        <h2>Key Rules · Rule 1</h2>
+        <article class="rule-card rule-card--sequence">
+            <div class="rule-card__head">
+              <div>
+                <span class="rule-card__tag">Rule 1</span>
+                <h3 class="rule-card__title">Programs run top to bottom</h3>
+              </div>
+            </div>
+            <p class="rule-card__body">
+              In a script, Python runs <strong>one line at a time</strong>, starting at the top and moving down. A line
+              does not begin until the line above it has finished. Later rules in this lesson describe what happens
+              <em>inside</em> a single line; this rule is about the order of the lines themselves.
+            </p>
+            <div class="step-viz" data-step-viz>
+              <p class="step-viz__label">Visualization</p>
+              <div class="step-buttons">
+                <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+                <button type="button" class="step-btn" data-step-id="1">Step 1: Line 1</button>
+                <button type="button" class="step-btn" data-step-id="2">Step 2: Line 2</button>
+              </div>
+              <div class="code-editor" aria-live="polite">
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">1</span>
+                  <div class="code-editor__code">
+                    <span class="token-hl" data-step-highlight="1"><span class="code-var">age</span> <span class="code-op">=</span> <span class="code-num">23</span></span>
+                  </div>
+                </div>
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">2</span>
+                  <div class="code-editor__code">
+                    <span class="token-hl" data-step-highlight="2"><span class="code-fn">print</span>(<span class="code-str">"Hi"</span>, <span class="code-fn">str</span>(<span class="code-var">age</span>))</span>
+                  </div>
+                </div>
+              </div>
+              <div class="step-explanation" data-step-explanation="0">
+                <strong>Starter code:</strong> Two lines in order. Click the steps to see which line Python runs first.
+              </div>
+              <div class="step-explanation" data-step-explanation="1">
+                <strong>Step 1:</strong> Python runs line 1 and stores the integer <code>23</code> in <code>age</code>. Line 2 waits.
+              </div>
+              <div class="step-explanation" data-step-explanation="2">
+                <strong>Step 2:</strong> Line 1 is done, so Python moves to line 2 and runs the <code>print</code> call (using the <code>age</code> that already exists).
+              </div>
+            </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="intro">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+          </button>
+          <span class="lesson-progress">2 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="rule2">
+            Next: Rule 2 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="rule2">
+      <div class="card rules-panel">
+        <h2>Key Rules · Rule 2</h2>
+        <article class="rule-card rule-card--math">
+            <div class="rule-card__head">
+              <div>
+                <span class="rule-card__tag">Rule 2</span>
+                <h3 class="rule-card__title">Use parentheses for math order</h3>
+              </div>
+            </div>
+            <p class="rule-card__body">
+              If you care which operation happens first, write it in your code with parentheses. That keeps your intent
+              clear to Python and to anyone reading your program. You do not need to memorize PEMDAS like rules for this course.
+            </p>
+            <div class="step-viz" data-step-viz>
+              <p class="step-viz__label">Visualization</p>
+              <div class="step-buttons">
+                <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+                <button type="button" class="step-btn" data-step-id="1">Step 1: Group (...)</button>
+                <button type="button" class="step-btn" data-step-id="2">Step 2: Add inside</button>
+                <button type="button" class="step-btn" data-step-id="3">Step 3: Multiply</button>
+              </div>
+              <div class="code-editor" aria-live="polite">
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">1</span>
+                  <div class="code-editor__code">
+                    <span class="code-var">total</span> <span class="code-op">=</span>
+                    <span class="token-hl" data-step-highlight="1">(<span class="token-hl" data-step-highlight="2"><span class="code-var">price</span> <span class="code-op">+</span> <span class="code-var">tax</span></span>)</span>
+                    <span class="token-hl" data-step-highlight="3"><span class="code-op"> * </span><span class="code-num">quantity</span></span><span class="token-hl hl-done" data-step-highlight="3" data-viz-annotation> → 30</span>
+                  </div>
+                </div>
+              </div>
+              <div class="step-explanation" data-step-explanation="0">
+                <strong>Starter code:</strong> The expression as written. Parentheses show which part you want evaluated first.
+              </div>
+              <div class="step-explanation" data-step-explanation="1">
+                <strong>Step 1:</strong> Parentheses say &ldquo;do this part first.&rdquo; Python evaluates <code>(price + tax)</code> before the multiply.
+              </div>
+              <div class="step-explanation" data-step-explanation="2">
+                <strong>Step 2:</strong> Inside the group, <code>price + tax</code> becomes <code>15</code> (e.g. 10 + 5).
+              </div>
+              <div class="step-explanation" data-step-explanation="3">
+                <strong>Step 3:</strong> Then <code>15 * quantity</code> runs (e.g. × 2 → <code>30</code>). Without parentheses, you might not get the order you intend.
+              </div>
+            </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="rule1">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Rule 1
+          </button>
+          <span class="lesson-progress">3 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="rule3">
+            Next: Rule 3 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="rule3">
+      <div class="card rules-panel">
+        <h2>Key Rules · Rule 3</h2>
+        <article class="rule-card rule-card--assign">
+            <div class="rule-card__head">
+              <div>
+                <span class="rule-card__tag">Rule 3</span>
+                <h3 class="rule-card__title">Assignment evaluates the RIGHT HAND SIDE first</h3>
+              </div>
+            </div>
+            <p class="rule-card__body">
+              Python finishes the entire expression on the <em>right</em> of <code>=</code>, then attaches that value to
+              the name on the left. The left side is just the label; it does not run first.
+            </p>
+            <div class="step-viz" data-step-viz>
+              <p class="step-viz__label">Visualization</p>
+              <div class="step-buttons">
+                <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+                <button type="button" class="step-btn" data-step-id="1">Step 1: Evaluate 5 + 7</button>
+                <button type="button" class="step-btn" data-step-id="2">Step 2: x = 12</button>
+              </div>
+              <div class="code-editor" aria-live="polite">
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">1</span>
+                  <div class="code-editor__code">
+                    <span data-step-visible="0,1">
+                      <span class="code-var">x</span> <span class="code-op">=</span>
+                      <span class="token-hl" data-step-highlight="1"><span class="code-num">5</span> <span class="code-op">+</span> <span class="code-num">7</span></span>
+                    </span>
+                    <span data-step-visible="2" hidden>
+                      <span class="token-hl hl-done" data-step-highlight="2"><span class="code-var">x</span> <span class="code-op">=</span> <span class="code-num">12</span></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="step-explanation" data-step-explanation="0">
+                <strong>Starter code:</strong> The assignment as written. Click the next steps to see what Python evaluates first.
+              </div>
+              <div class="step-explanation" data-step-explanation="1">
+                <strong>Step 1:</strong> Python evaluates <code>5 + 7</code> on the right. <code>x</code> on the left waits.
+              </div>
+              <div class="step-explanation" data-step-explanation="2">
+                <strong>Step 2:</strong> The RHS is done. Python binds <code>x</code> to <code>12</code>, so the line reads <code>x = 12</code>.
+              </div>
+            </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="rule2">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Rule 2
+          </button>
+          <span class="lesson-progress">4 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="rule4">
+            Next: Rule 4 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="rule4">
+      <div class="card rules-panel">
+        <h2>Key Rules · Rule 4</h2>
+        <article class="rule-card rule-card--calls">
+            <div class="rule-card__head">
+              <div>
+                <span class="rule-card__tag">Rule 4</span>
+                <h3 class="rule-card__title">Arguments before the function runs</h3>
+              </div>
+            </div>
+            <p class="rule-card__body">
+              Every argument must be evaluated before the function is called. Positional arguments go
+              <strong>left to right</strong>. Inner expressions (like an <code>int</code> variable inside a nested call)
+              resolve before the outer call.
+            </p>
+            <div class="step-viz" data-step-viz>
+              <p class="step-viz__label">Example: print("Hi", str(age))</p>
+              <p class="step-viz__intro">
+                <code>print</code> needs text, so the second argument uses <code>str(age)</code> to turn the int into a
+                string before the call runs.
+              </p>
+              <div class="step-buttons">
+                <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+                <button type="button" class="step-btn" data-step-id="1">Step 1: "Hi"</button>
+                <button type="button" class="step-btn" data-step-id="2">Step 2: age (int)</button>
+                <button type="button" class="step-btn" data-step-id="3">Step 3: str()</button>
+                <button type="button" class="step-btn" data-step-id="4">Step 4: print()</button>
+              </div>
+              <div class="code-editor" aria-live="polite">
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">1</span>
+                  <div class="code-editor__code">
+                    <span class="code-var">age</span> <span class="code-op">=</span> <span class="code-num">23</span>
+                  </div>
+                </div>
+                <div class="code-editor__row">
+                  <span class="code-editor__ln" aria-hidden="true">2</span>
+                  <div class="code-editor__code">
+                    <span class="token-hl" data-step-highlight="4"><span class="code-fn">print</span></span>(<span class="token-hl hl-warm" data-step-highlight="1"><span class="code-str">"Hi"</span></span>, <span class="token-hl" data-step-highlight="3"><span class="code-fn">str</span>(<span class="token-hl" data-step-highlight="2"><span class="code-var">age</span></span>)</span>)
+                  </div>
+                </div>
+              </div>
+              <div class="step-explanation" data-step-explanation="0">
+                <strong>Starter code:</strong> First <code>age</code> is set to the integer <code>23</code>. Then the
+                <code>print</code> line runs. Click the steps to see how Python prepares each argument.
+              </div>
+              <div class="step-explanation" data-step-explanation="1">
+                <strong>Step 1:</strong> First argument: the string <code>"Hi"</code>.
+              </div>
+              <div class="step-explanation" data-step-explanation="2">
+                <strong>Step 2:</strong> For the second argument, Python looks up <code>age</code> and gets the integer <code>23</code>.
+              </div>
+              <div class="step-explanation" data-step-explanation="3">
+                <strong>Step 3:</strong> <code>str(23)</code> converts the int to the string <code>"23"</code> for <code>print</code>.
+              </div>
+              <div class="step-explanation" data-step-explanation="4">
+                <strong>Step 4:</strong> Both arguments are ready (<code>"Hi"</code> and <code>"23"</code>), so <code>print(...)</code> runs.
+              </div>
+            </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="rule3">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Rule 3
+          </button>
+          <span class="lesson-progress">5 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="nested">
+            Next: Nested calls <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="nested">
+      <div class="card rules-panel">
+        <h2>Nested function calls</h2>
+        <article class="rule-card rule-card--calls">
+          <div class="rule-card__head">
+            <div>
+              <span class="rule-card__tag">Inside out</span>
+              <h3 class="rule-card__title">One call inside another</h3>
+            </div>
+          </div>
+          <p class="rule-card__body">
+            When a function call appears <em>inside</em> another call (usually as an argument), Python still follows Rule 4:
+            every argument must become a value before the outer function runs. For nested calls, work from the
+            <strong>inside out</strong>: evaluate the innermost expression first, run the inner function, then use that
+            result for the next layer outward. The same idea applies to longer chains like <code>max(len(text), 3)</code>:
+            finish <code>len(text)</code>, then call <code>max</code> with that number.
+          </p>
+          <div class="step-viz" data-step-viz>
+            <p class="step-viz__label">Visualization: print(str(5 + 7))</p>
+            <p class="step-viz__intro">
+              <code>print</code> cannot run until its argument is ready. That argument is another call, so Python
+              evaluates <code>5 + 7</code> before <code>str</code>, and only then calls <code>print</code>.
+            </p>
+            <div class="step-buttons">
+              <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+              <button type="button" class="step-btn" data-step-id="1">Step 1: 5 + 7</button>
+              <button type="button" class="step-btn" data-step-id="2">Step 2: str()</button>
+              <button type="button" class="step-btn" data-step-id="3">Step 3: print()</button>
+            </div>
+            <div class="code-editor" aria-live="polite">
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">1</span>
+                <div class="code-editor__code">
+                  <span class="token-hl" data-step-highlight="3"><span class="code-fn">print</span></span>(<span class="token-hl" data-step-highlight="2"><span class="code-fn">str</span>(<span class="token-hl" data-step-highlight="1"><span class="code-num">5</span> <span class="code-op">+</span> <span class="code-num">7</span></span>)</span>)
+                </div>
+              </div>
+            </div>
+            <div class="step-explanation" data-step-explanation="0">
+              <strong>Starter code:</strong> Two function calls nested. Click through to see which piece Python evaluates first.
+            </div>
+            <div class="step-explanation" data-step-explanation="1">
+              <strong>Step 1:</strong> Innermost first: Python evaluates <code>5 + 7</code> to <code>12</code>. Neither <code>str</code> nor <code>print</code> runs yet.
+            </div>
+            <div class="step-explanation" data-step-explanation="2">
+              <strong>Step 2:</strong> With <code>12</code> ready, Python calls <code>str(12)</code> and gets the string <code>"12"</code>. That value is the argument for <code>print</code>.
+            </div>
+            <div class="step-explanation" data-step-explanation="3">
+              <strong>Step 3:</strong> The argument is ready, so <code>print("12")</code> runs and displays output.
+            </div>
+          </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="rule4">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Rule 4
+          </button>
+          <span class="lesson-progress">6 of 8</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="spotlight">
+            Next: Spotlight Breakdown <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="spotlight">
+      <div class="card">
+        <h2><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Spotlight Breakdown</h2>
+        <p style="color: var(--text-muted); margin-top: 0;">
+          Click each step to see which part of the code Python evaluates next.
+        </p>
+
+        <div class="step-viz" data-step-viz>
+          <p class="step-viz__label">Example 1: x = 5 + 7</p>
+          <p class="step-viz__intro">
+            The name on the left does not update until the entire expression on the right is evaluated to one value.
+          </p>
+          <div class="step-buttons">
+            <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+            <button type="button" class="step-btn" data-step-id="1">Step 1: Evaluate 5 + 7</button>
+            <button type="button" class="step-btn" data-step-id="2">Step 2: x = 12</button>
+          </div>
+          <div class="code-editor" aria-live="polite">
+            <div class="code-editor__row">
+              <span class="code-editor__ln" aria-hidden="true">1</span>
+              <div class="code-editor__code">
+                <span data-step-visible="0,1">
+                  <span class="code-var">x</span> <span class="code-op">=</span>
+                  <span class="token-hl" data-step-highlight="1"><span class="code-num">5</span> <span class="code-op">+</span> <span class="code-num">7</span></span>
+                </span>
+                <span data-step-visible="2" hidden>
+                  <span class="token-hl hl-done" data-step-highlight="2"><span class="code-var">x</span> <span class="code-op">=</span> <span class="code-num">12</span></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="step-explanation" data-step-explanation="0">
+            <strong>Starter code:</strong> The assignment as written. Click the next steps to see what Python evaluates first.
+          </div>
+          <div class="step-explanation" data-step-explanation="1">
+            <strong>Step 1:</strong> Python evaluates the entire right-hand side <code>5 + 7</code>. The name <code>x</code> on the left waits.
+          </div>
+          <div class="step-explanation" data-step-explanation="2">
+            <strong>Step 2:</strong> The RHS is done. Python binds <code>x</code> to <code>12</code>, so the line reads <code>x = 12</code>.
+          </div>
+        </div>
+
+        <div class="step-viz" data-step-viz style="margin-top: 2rem;">
+          <p class="step-viz__label">Example 2: print("My name is: ", str(name))</p>
+          <p class="step-viz__intro">
+            A function cannot run until every argument is evaluated. Arguments go left to right; nested pieces resolve inside out.
+          </p>
+          <div class="step-buttons">
+            <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+            <button type="button" class="step-btn" data-step-id="1">Step 1: First argument</button>
+            <button type="button" class="step-btn" data-step-id="2">Step 2: Lookup name</button>
+            <button type="button" class="step-btn" data-step-id="3">Step 3: Call str()</button>
+            <button type="button" class="step-btn" data-step-id="4">Step 4: Call print()</button>
+          </div>
+          <div class="code-editor" aria-live="polite">
+            <div class="code-editor__row">
+              <span class="code-editor__ln" aria-hidden="true">1</span>
+              <div class="code-editor__code">
+                <span class="token-hl" data-step-highlight="4"><span class="code-fn">print</span></span>(<span class="token-hl hl-warm" data-step-highlight="1"><span class="code-str">"My name is: "</span></span>, <span class="token-hl" data-step-highlight="3"><span class="code-fn">str</span>(<span class="token-hl" data-step-highlight="2"><span class="code-var">name</span></span>)</span>)
+              </div>
+            </div>
+          </div>
+          <div class="step-explanation" data-step-explanation="0">
+            <strong>Starter code:</strong> The call as written. No argument is highlighted yet.
+          </div>
+          <div class="step-explanation" data-step-explanation="1">
+            <strong>Step 1:</strong> Arguments are evaluated left to right. The first argument is the string <code>"My name is: "</code>.
+          </div>
+          <div class="step-explanation" data-step-explanation="2">
+            <strong>Step 2:</strong> For the second argument, Python must evaluate the inner expression <code>name</code> before <code>str</code> can run.
+          </div>
+          <div class="step-explanation" data-step-explanation="3">
+            <strong>Step 3:</strong> <code>str(...)</code> produces a string from the value stored in <code>name</code>.
+          </div>
+          <div class="step-explanation" data-step-explanation="4">
+            <strong>Step 4:</strong> Both arguments are ready, so <code>print(...)</code> runs and writes output. The call returns <code>None</code>.
+          </div>
+        </div>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="nested">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Nested calls
+          </button>
+          <span class="lesson-progress">7 of 8 · Spotlight Breakdown</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="quiz">
+            Next: Interactive Quiz <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="quiz">
+      <div class="card">
+        <h2><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Interactive Quiz</h2>
+        <p style="color: var(--text); opacity: 0.85; margin-top: 0;">Choose an answer. You get immediate feedback.</p>
+
+        <div class="quiz-block" data-quiz data-quiz-correct="rhs">
+          <h3>1. In <code style="font-family: var(--font-mono);">x = 5 + 7</code>, what happens first?</h3>
+          <div class="quiz-options">
+            <button type="button" class="quiz-option-label" data-quiz-choice="lhs">Python stores something in <code>x</code>, then computes <code>5 + 7</code></button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="rhs">Python evaluates <code>5 + 7</code> on the right, then binds <code>x</code> to that result</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="eq">Python runs the <code>=</code> operator alone before any numbers are combined</button>
+          </div>
+          <div class="feedback-box" data-feedback="correct" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Correct! The RHS is fully evaluated first; assignment only connects the name to the value that is already computed.
+          </div>
+          <div class="feedback-box" data-feedback="wrong" role="status">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Not quite. The name on the left is the destination. All expression work on the right finishes first.
+          </div>
+        </div>
+
+        <div class="quiz-block" data-quiz data-quiz-correct="first">
+          <h3>2. In <code style="font-family: var(--font-mono);">print("My name is: ", str(name))</code>, which part is evaluated first?</h3>
+          <div class="quiz-options">
+            <button type="button" class="quiz-option-label" data-quiz-choice="first">The first argument: <code>"My name is: "</code></button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="print">The <code>print</code> function runs before any arguments</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="second">The whole second argument <code>str(name)</code> before the string literal</button>
+          </div>
+          <div class="feedback-box" data-feedback="correct" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Correct! Arguments are evaluated left to right, so the first literal is ready before Python moves on to <code>str(name)</code>.
+          </div>
+          <div class="feedback-box" data-feedback="wrong" role="status">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Try again. The function does not execute until each argument expression has been evaluated, starting from the left.
+          </div>
+        </div>
+
+        <div class="quiz-block" data-quiz data-quiz-correct="inner">
+          <h3>3. In <code style="font-family: var(--font-mono);">print(str(5 + 7))</code>, what is evaluated first?</h3>
+          <div class="quiz-options">
+            <button type="button" class="quiz-option-label" data-quiz-choice="inner">The expression <code>5 + 7</code> inside the inner call</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="str">The <code>str</code> function, before the addition</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="print">The <code>print</code> function, before its argument is ready</button>
+          </div>
+          <div class="feedback-box" data-feedback="correct" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Correct! Nested calls go inside out: <code>5 + 7</code> becomes <code>12</code>, then <code>str</code>, then <code>print</code>.
+          </div>
+          <div class="feedback-box" data-feedback="wrong" role="status">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Not quite. Python finishes the innermost expression before any function that wraps it can run.
+          </div>
+        </div>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="spotlight">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Spotlight Breakdown
+          </button>
+          <span class="lesson-progress">8 of 8 · Interactive Quiz</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- <footer class="site-footer">
+    <p><!-- <a href="/">← Back to home</a> &copy; Sam Zilli</p>
+  </footer> -->
+  
+
+  <script src="script.js"></script>
+</body>
+</html>

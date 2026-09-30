@@ -192,6 +192,7 @@
       background: var(--bg-card);
     }
 
+    .rule-card--call { --rule-accent: #f97316; }
     .rule-card--param { --rule-accent: #c084fc; }
     .rule-card--arg { --rule-accent: #3dd68c; }
     .rule-card--both { --rule-accent: #3b9eff; }
@@ -376,13 +377,14 @@
         <i class="fa-brands fa-python" aria-hidden="true"></i>
         <span>Parameters vs Arguments</span>
       </div>
-      <a class="site-header__link" href="../">← Expression evaluation lesson</a>
+      <a class="site-header__link" href="../how-python-reads/">← Expression evaluation lesson</a>
     </div>
   </header>
 
   <main>
     <nav class="lesson-tabs" aria-label="Lesson sections">
       <button type="button" class="lesson-tab is-active" data-lesson-tab="intro">Intro</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="calling">Calling</button>
       <button type="button" class="lesson-tab" data-lesson-tab="parameters">Parameters</button>
       <button type="button" class="lesson-tab" data-lesson-tab="arguments">Arguments</button>
       <button type="button" class="lesson-tab" data-lesson-tab="together">Together</button>
@@ -393,9 +395,6 @@
       <div class="card">
         <section class="hero">
           <h1>Parameters vs Arguments</h1>
-          <p>
-            These words show up in almost every function lesson. They are related but not interchangeable.
-          </p>
         </section>
         <table class="compare-table">
           <thead>
@@ -429,7 +428,72 @@
           This page is Python-only and matches our course vocabulary.
         </p>
         <div class="lesson-nav">
-          <span class="lesson-progress">1 of 5</span>
+          <span class="lesson-progress">1 of 6</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="calling">
+            Next: Calling functions <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="calling">
+      <div class="card">
+        <article class="rule-card rule-card--call">
+          <span class="rule-card__tag">Calling</span>
+          <h2 class="rule-card__title">Invoking a function</h2>
+          <p class="rule-card__body">
+            To <strong>call</strong> a function, write its name followed by parentheses. Put any arguments inside the
+            parentheses, separated by commas. The call is an expression: Python evaluates the arguments, runs the
+            function’s code, then continues with the value the call produces (or <code>None</code> for functions like
+            <code>print</code> that do not return a useful value).
+          </p>
+          <div class="step-viz" data-step-viz>
+            <p class="step-viz__label">Example: calling print</p>
+            <div class="step-buttons">
+              <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+              <button type="button" class="step-btn" data-step-id="1">Step 1: Line 1 runs</button>
+              <button type="button" class="step-btn" data-step-id="2">Step 2: Arguments</button>
+              <button type="button" class="step-btn" data-step-id="3">Step 3: print runs</button>
+            </div>
+            <div class="code-editor" aria-live="polite">
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">1</span>
+                <div class="code-editor__code">
+                  <span class="token-hl" data-step-highlight="1"><span class="code-var">age</span> <span class="code-op">=</span> <span class="code-num">23</span></span>
+                </div>
+              </div>
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">2</span>
+                <div class="code-editor__code">
+                  <span class="token-hl" data-step-highlight="3"><span class="code-fn">print</span></span>(<span class="token-hl hl-warm" data-step-highlight="2"><span class="code-str">"Hi"</span></span>, <span class="token-hl" data-step-highlight="2"><span class="code-fn">str</span>(<span class="code-var">age</span>)</span>)
+                </div>
+              </div>
+            </div>
+            <div class="step-explanation" data-step-explanation="0">
+              <strong>Starter code:</strong> Line 2 is a function <em>call</em>. Use the steps to see when Python runs it.
+            </div>
+            <div class="step-explanation" data-step-explanation="1">
+              <strong>Step 1:</strong> Programs run top to bottom. Line 1 finishes first so <code>age</code> exists before line 2.
+            </div>
+            <div class="step-explanation" data-step-explanation="2">
+              <strong>Step 2:</strong> To call <code>print</code>, Python evaluates each argument expression (see
+              <a href="../how-python-reads/">expression evaluation</a> · Rule 4).
+            </div>
+            <div class="step-explanation" data-step-explanation="3">
+              <strong>Step 3:</strong> Arguments are ready, so the <code>print</code> call runs and output appears. The call’s result is <code>None</code>.
+            </div>
+          </div>
+          <p class="rule-card__body" style="margin-top: 1rem;">
+            You can call functions you define (e.g. <code>add(5, 3)</code>) or built-ins like <code>print</code> and
+            <code>len</code>. The next pages name the pieces: <em>parameters</em> in the definition and
+            <em>arguments</em> in the call.
+          </p>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="intro">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+          </button>
+          <span class="lesson-progress">2 of 6</span>
           <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="parameters">
             Next: Parameters <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
@@ -466,10 +530,10 @@
           </p>
         </article>
         <div class="lesson-nav">
-          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="intro">
-            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="calling">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Calling
           </button>
-          <span class="lesson-progress">2 of 5</span>
+          <span class="lesson-progress">3 of 6</span>
           <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="arguments">
             Next: Arguments <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
@@ -486,7 +550,7 @@
             Arguments are what you supply when you invoke the function. They can be literals (<code>5</code>),
             variables (<code>score</code>), or expressions (<code>len(name)</code>). Python evaluates each argument
             expression first, then passes the results into the parameter slots (see
-            <a href="../">expression evaluation</a> · Rule 4).
+            <a href="../how-python-reads/">expression evaluation</a> · Rule 4).
           </p>
           <div class="code-editor" aria-label="Function call with arguments">
             <div class="code-editor__row">
@@ -505,7 +569,7 @@
           <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="parameters">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Parameters
           </button>
-          <span class="lesson-progress">3 of 5</span>
+          <span class="lesson-progress">4 of 6</span>
           <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="together">
             Next: Together <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
@@ -569,7 +633,7 @@
           <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="arguments">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Arguments
           </button>
-          <span class="lesson-progress">4 of 5</span>
+          <span class="lesson-progress">5 of 6</span>
           <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="quiz">
             Next: Quiz <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
@@ -615,7 +679,7 @@
           <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="together">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Together
           </button>
-          <span class="lesson-progress">5 of 5</span>
+          <span class="lesson-progress">6 of 6</span>
         </div>
       </div>
     </div>
