@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parameters vs Arguments | Sam Zilli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg-elevated: #161b26;
+      --bg-card: #1c2333;
+      --border: #2a3348;
+      --text: #e8ecf4;
+      --text-muted: #9aa4b8;
+      --accent: #3b9eff;
+      --accent-dim: rgba(59, 158, 255, 0.15);
+      --python: #ffd43b;
+      --python-dim: rgba(255, 212, 59, 0.12);
+      --success: #3dd68c;
+      --success-dim: rgba(61, 214, 140, 0.15);
+      --danger: #f87171;
+      --danger-dim: rgba(248, 113, 113, 0.15);
+      --code-bg: #0d1018;
+      --radius: 10px;
+      --font-sans: "Inter", system-ui, sans-serif;
+      --font-mono: "Fira Code", ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 158, 255, 0.08), transparent);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      padding: 1rem 1.5rem;
+    }
+
+    .site-header__inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .site-header__logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .site-header__logo i { color: var(--python); font-size: 1.35rem; }
+
+    .site-header__link {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p { margin: 0; color: var(--text-muted); max-width: 42rem; }
+
+    .lesson-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lesson-tab {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .lesson-tab:hover { color: var(--text); background: var(--bg-card); }
+    .lesson-tab.is-active {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-color: var(--border);
+    }
+
+    .lesson-panel { display: none; }
+    .lesson-panel.is-active { display: block; }
+
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .lesson-progress { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+    .lesson-btn {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lesson-btn--next { background: var(--accent); border-color: var(--accent); color: #0f1117; }
+    .lesson-btn--back { background: transparent; color: var(--text-muted); }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 1.25rem 0 0;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .compare-table th {
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .compare-table td { color: var(--text-muted); }
+    .compare-table td:first-child { color: var(--text); font-weight: 500; width: 28%; }
+
+    .rule-card {
+      padding: 1.35rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .rule-card--param { --rule-accent: #c084fc; }
+    .rule-card--arg { --rule-accent: #3dd68c; }
+    .rule-card--both { --rule-accent: #3b9eff; }
+
+    .rule-card__tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--rule-accent);
+    }
+
+    .rule-card__title {
+      margin: 0.25rem 0 0.75rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .rule-card__body {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .code-editor {
+      font-family: var(--font-mono);
+      background: var(--code-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 1rem 0 0;
+      overflow: hidden;
+    }
+
+    .code-editor__row { display: flex; align-items: stretch; min-height: 2rem; }
+    .code-editor__row + .code-editor__row { border-top: 1px solid var(--border); }
+
+    .code-editor__ln {
+      flex: 0 0 2.85rem;
+      padding: 0.55rem 0.5rem;
+      text-align: right;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      opacity: 0.7;
+      user-select: none;
+      background: rgba(0, 0, 0, 0.2);
+      border-right: 1px solid var(--border);
+    }
+
+    .code-editor__code {
+      flex: 1;
+      padding: 0.55rem 1rem;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .code-kw { color: #f87171; font-weight: 600; }
+    .code-fn { color: var(--accent); font-weight: 600; }
+    .code-param { color: #c084fc; font-weight: 600; }
+    .code-arg { color: var(--success); font-weight: 600; }
+    .code-num { color: var(--python); }
+    .code-op { color: #fbbf24; font-weight: 600; }
+    .code-var { color: var(--python); }
+
+    .token-hl {
+      padding: 0.1em 0.2em;
+      border-radius: 4px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .token-hl.is-highlighted {
+      box-shadow: 0 0 0 2px var(--rule-accent);
+      background: color-mix(in srgb, var(--rule-accent) 20%, transparent);
+    }
+
+    .step-viz__label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 1rem 0 0.5rem;
+    }
+
+    .step-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .step-btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .step-btn.active {
+      background: var(--rule-accent);
+      border-color: var(--rule-accent);
+      color: #0f1117;
+    }
+
+    .step-explanation {
+      display: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .step-explanation.is-visible { display: block; }
+    .step-explanation strong { color: var(--text); }
+
+    .quiz-block { margin-bottom: 2rem; }
+    .quiz-block h3 { margin: 0 0 1rem; font-size: 1.05rem; color: var(--text); }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option-label {
+      font-family: inherit;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .quiz-option-label:hover { border-color: var(--accent); }
+    .quiz-option-label.quiz-option--correct {
+      border-color: var(--success);
+      background: var(--success-dim);
+    }
+
+    .quiz-option-label.quiz-option--wrong {
+      border-color: var(--danger);
+      background: var(--danger-dim);
+    }
+
+    .feedback-box {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .feedback-box.is-visible { display: block; }
+    .feedback-box[data-feedback="correct"] {
+      background: var(--success-dim);
+      color: var(--text);
+      border: 1px solid var(--success);
+    }
+
+    .feedback-box[data-feedback="wrong"] {
+      background: var(--danger-dim);
+      color: var(--text);
+      border: 1px solid var(--danger);
+    }
+
+    .source-note {
+      margin-top: 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <div class="site-header__logo">
+        <i class="fa-brands fa-python" aria-hidden="true"></i>
+        <span>Parameters vs Arguments</span>
+      </div>
+      <a class="site-header__link" href="../">← Expression evaluation lesson</a>
+    </div>
+  </header>
+
+  <main>
+    <nav class="lesson-tabs" aria-label="Lesson sections">
+      <button type="button" class="lesson-tab is-active" data-lesson-tab="intro">Intro</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="parameters">Parameters</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="arguments">Arguments</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="together">Together</button>
+      <button type="button" class="lesson-tab" data-lesson-tab="quiz">Quiz</button>
+    </nav>
+
+    <div class="lesson-panel is-active" data-lesson-panel="intro">
+      <div class="card">
+        <section class="hero">
+          <h1>Parameters vs Arguments</h1>
+          <p>
+            These words show up in almost every function lesson. They are related but not interchangeable.
+          </p>
+        </section>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Parameters</th>
+              <th scope="col">Arguments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>What</td>
+              <td>Names in the <code>def</code> line — placeholders for incoming values</td>
+              <td>Actual values (or variables) you pass when you <em>call</em> the function</td>
+            </tr>
+            <tr>
+              <td>Where</td>
+              <td>Function definition</td>
+              <td>Function call</td>
+            </tr>
+            <tr>
+              <td>Python example</td>
+              <td><code>x</code> and <code>y</code> in <code>def add(x, y):</code></td>
+              <td><code>5</code> and <code>3</code> in <code>add(5, 3)</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="source-note">
+          Summary adapted from
+          <a href="https://www.geeksforgeeks.org/computer-science-fundamentals/difference-between-parameters-and-arguments/" target="_blank" rel="noopener">GeeksforGeeks: Difference Between Parameters and Arguments</a>.
+          This page is Python-only and matches our course vocabulary.
+        </p>
+        <div class="lesson-nav">
+          <span class="lesson-progress">1 of 5</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="parameters">
+            Next: Parameters <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="parameters">
+      <div class="card">
+        <article class="rule-card rule-card--param">
+          <span class="rule-card__tag">Parameters</span>
+          <h2 class="rule-card__title">Names in the function header</h2>
+          <p class="rule-card__body">
+            Parameters are the variable names listed in a <code>def</code>. They tell you how many values the function
+            expects and what each slot is called <em>inside</em> the function body. They do not hold your data until
+            someone calls the function and Python binds arguments to those names.
+          </p>
+          <div class="code-editor" aria-label="Function definition with parameters">
+            <div class="code-editor__row">
+              <span class="code-editor__ln" aria-hidden="true">1</span>
+              <div class="code-editor__code">
+                <span class="code-kw">def</span> <span class="code-fn">add</span>(<span class="code-param">x</span>, <span class="code-param">y</span>):
+              </div>
+            </div>
+            <div class="code-editor__row">
+              <span class="code-editor__ln" aria-hidden="true">2</span>
+              <div class="code-editor__code">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-kw">return</span> <span class="code-param">x</span> <span class="code-op">+</span> <span class="code-param">y</span>
+              </div>
+            </div>
+          </div>
+          <p class="rule-card__body" style="margin-top: 1rem;">
+            Here <code>x</code> and <code>y</code> are parameters. They are the same names used in the body on line 2.
+          </p>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="intro">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+          </button>
+          <span class="lesson-progress">2 of 5</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="arguments">
+            Next: Arguments <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="arguments">
+      <div class="card">
+        <article class="rule-card rule-card--arg">
+          <span class="rule-card__tag">Arguments</span>
+          <h2 class="rule-card__title">Values at the call site</h2>
+          <p class="rule-card__body">
+            Arguments are what you supply when you invoke the function. They can be literals (<code>5</code>),
+            variables (<code>score</code>), or expressions (<code>len(name)</code>). Python evaluates each argument
+            expression first, then passes the results into the parameter slots (see
+            <a href="../">expression evaluation</a> · Rule 4).
+          </p>
+          <div class="code-editor" aria-label="Function call with arguments">
+            <div class="code-editor__row">
+              <span class="code-editor__ln" aria-hidden="true">1</span>
+              <div class="code-editor__code">
+                <span class="code-var">result</span> <span class="code-op">=</span> <span class="code-fn">add</span>(<span class="code-arg">5</span>, <span class="code-arg">3</span>)
+              </div>
+            </div>
+          </div>
+          <p class="rule-card__body" style="margin-top: 1rem;">
+            <code>5</code> and <code>3</code> are arguments. For this call, Python binds parameter <code>x</code> to
+            <code>5</code> and parameter <code>y</code> to <code>3</code> while <code>add</code> runs.
+          </p>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="parameters">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Parameters
+          </button>
+          <span class="lesson-progress">3 of 5</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="together">
+            Next: Together <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="together">
+      <div class="card">
+        <article class="rule-card rule-card--both">
+          <span class="rule-card__tag">Definition + call</span>
+          <h2 class="rule-card__title">Same function, two places</h2>
+          <p class="rule-card__body">
+            The definition creates the function and lists parameters. A later call passes arguments. The count of
+            positional arguments must match the number of parameters (unless defaults or <code>*</code> syntax apply,
+            which we cover later).
+          </p>
+          <div class="step-viz" data-step-viz>
+            <p class="step-viz__label">Step through</p>
+            <div class="step-buttons">
+              <button type="button" class="step-btn" data-step-id="0">Starter Code</button>
+              <button type="button" class="step-btn" data-step-id="1">Step 1: Parameters</button>
+              <button type="button" class="step-btn" data-step-id="2">Step 2: Arguments</button>
+              <button type="button" class="step-btn" data-step-id="3">Step 3: Bind &amp; run</button>
+            </div>
+            <div class="code-editor" aria-live="polite">
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">1</span>
+                <div class="code-editor__code">
+                  <span class="code-kw">def</span> <span class="code-fn">add</span>(<span class="token-hl" data-step-highlight="1"><span class="code-param">x</span>, <span class="code-param">y</span></span>):
+                </div>
+              </div>
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">2</span>
+                <div class="code-editor__code">
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-kw">return</span> <span class="code-param">x</span> <span class="code-op">+</span> <span class="code-param">y</span>
+                </div>
+              </div>
+              <div class="code-editor__row">
+                <span class="code-editor__ln" aria-hidden="true">3</span>
+                <div class="code-editor__code">
+                  <span class="code-var">result</span> <span class="code-op">=</span> <span class="code-fn">add</span>(<span class="token-hl" data-step-highlight="2"><span class="code-arg">5</span>, <span class="code-arg">3</span></span>)
+                </div>
+              </div>
+            </div>
+            <div class="step-explanation" data-step-explanation="0">
+              <strong>Starter code:</strong> Lines 1–2 define the function; line 3 calls it.
+            </div>
+            <div class="step-explanation" data-step-explanation="1">
+              <strong>Step 1:</strong> On the <code>def</code> line, <code>x</code> and <code>y</code> are <em>parameters</em> — names for values the function will receive.
+            </div>
+            <div class="step-explanation" data-step-explanation="2">
+              <strong>Step 2:</strong> On the call line, <code>5</code> and <code>3</code> are <em>arguments</em> — the actual values passed into <code>add</code>.
+            </div>
+            <div class="step-explanation" data-step-explanation="3">
+              <strong>Step 3:</strong> While <code>add</code> runs, <code>x</code> is bound to <code>5</code> and <code>y</code> to <code>3</code>. The function returns <code>8</code>, stored in <code>result</code>.
+            </div>
+          </div>
+        </article>
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="arguments">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Arguments
+          </button>
+          <span class="lesson-progress">4 of 5</span>
+          <button type="button" class="lesson-btn lesson-btn--next" data-lesson-next="quiz">
+            Next: Quiz <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-panel" data-lesson-panel="quiz">
+      <div class="card">
+        <h2><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Quick check</h2>
+
+        <div class="quiz-block" data-quiz data-quiz-correct="param">
+          <h3>1. In <code style="font-family: var(--font-mono);">def greet(name):</code>, what is <code>name</code>?</h3>
+          <div class="quiz-options">
+            <button type="button" class="quiz-option-label" data-quiz-choice="param">A parameter</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="arg">An argument</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="both">Both at once</button>
+          </div>
+          <div class="feedback-box" data-feedback="correct" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Correct — <code>name</code> is part of the function definition, so it is a parameter.
+          </div>
+          <div class="feedback-box" data-feedback="wrong" role="status">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Not quite. Arguments appear at the call, e.g. <code>greet("Sam")</code>.
+          </div>
+        </div>
+
+        <div class="quiz-block" data-quiz data-quiz-correct="arg">
+          <h3>2. In <code style="font-family: var(--font-mono);">add(5, 3)</code>, what are <code>5</code> and <code>3</code>?</h3>
+          <div class="quiz-options">
+            <button type="button" class="quiz-option-label" data-quiz-choice="param">Parameters</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="arg">Arguments</button>
+            <button type="button" class="quiz-option-label" data-quiz-choice="local">Local variables only</button>
+          </div>
+          <div class="feedback-box" data-feedback="correct" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Correct — they are values passed at the call site, so they are arguments.
+          </div>
+          <div class="feedback-box" data-feedback="wrong" role="status">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Parameters are the names in <code>def add(x, y):</code>. Literals in the call are arguments.
+          </div>
+        </div>
+
+        <div class="lesson-nav">
+          <button type="button" class="lesson-btn lesson-btn--back" data-lesson-prev="together">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back: Together
+          </button>
+          <span class="lesson-progress">5 of 5</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
