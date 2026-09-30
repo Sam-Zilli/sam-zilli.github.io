@@ -315,10 +315,18 @@
 
     .quiz-block { margin-bottom: 2rem; }
     .quiz-block h3 { margin: 0 0 1rem; font-size: 1.05rem; color: var(--text); }
-    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      counter-reset: quiz-letter;
+    }
 
     .quiz-option-label {
       font-family: inherit;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
       text-align: left;
       padding: 0.85rem 1rem;
       border-radius: var(--radius);
@@ -328,6 +336,15 @@
       cursor: pointer;
       font-size: 0.95rem;
       line-height: 1.45;
+    }
+
+    .quiz-option-label::before {
+      content: counter(quiz-letter, upper-alpha) ".";
+      counter-increment: quiz-letter;
+      flex-shrink: 0;
+      min-width: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
     }
 
     .quiz-option-label:hover { border-color: var(--accent); }
